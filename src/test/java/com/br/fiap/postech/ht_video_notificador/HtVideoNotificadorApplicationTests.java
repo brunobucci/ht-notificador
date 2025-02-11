@@ -7,7 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 class HtVideoNotificadorApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void main() {
+		HtVideoNotificadorApplication.main(new String[] {});
 	}
 
 }

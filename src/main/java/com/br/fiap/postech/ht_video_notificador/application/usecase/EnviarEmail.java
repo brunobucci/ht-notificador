@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,19 +17,19 @@ import com.br.fiap.postech.ht_video_notificador.domain.usecase.IEnviarEmailUseca
 @Service
 public class EnviarEmail implements IEnviarEmailUsecase{
 
-private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    
+	@Value("${email.host}") 
+    String host;
+	@Value("${email.porta}") 
+    int porta;
+	@Value("${email.user}") 
+    String user;
+	@Value("${email.pass}") 
+    String password;
 	
-    //private final INotificacaoQueueAdapterOUT notificacaoQueueAdapterOUT;
-
-//    @Autowired
-//    private Gson gson;
-    
-//    public EnviarEmail(INotificacaoQueueAdapterOUT notificacaoQueueAdapterOUT) {
-//        this.notificacaoQueueAdapterOUT = notificacaoQueueAdapterOUT;
-//    }
-    
 	@Override
-	public void executar(VideoDto videoDto) {
+	public SimpleMailMessage executar(VideoDto videoDto) {
 		try {
 			logger.info("Iniciou processo de envio de email.");
 
@@ -36,24 +37,24 @@ private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	        message.setFrom("teste@brunobucci.me");
 	        message.setTo("marcelo30128@gmail.com"); 
 	        message.setSubject("Teste de e-mail"); 
-	        StringBuffer sb = new StringBuffer();
+	        StringBuilder sb = new StringBuilder();
 	        sb.append("Erro ao processar extração de frames de vídeo.")
 	        .append("\n id: ").append(videoDto.getId())
 	        .append("\n codigoEdicao: ").append(videoDto.getCodigoEdicao())
 	        .append("\n nome: ").append(videoDto.getNome())
+	        .append("\n nro. de tentativas: ").append(videoDto.getTentativasDeEdicao())
 	        .append("\n status: ").append(videoDto.getStatusEdicao());
 	        message.setText(sb.toString());
 	        getJavaMailSender().send(message);
 			
-			//notificacaoQueueAdapterOUT.publishVideoComErro(toVideoMessage(videoDto));
-			
 			logger.info("Finalizou processo de envio de email.");
+			
+			return message;
 		}
 		catch(Exception ex) {
-			//TODO - Publicar na fila de video com erro
-			//extracaoQueueAdapterOUT.publishVideoProcessado(toVideoMessage(videoDto));
-			logger.error("Video publicado na fila videos_com_erro: ", ex);
-		}		
+			logger.error("Falha no processo de envio de email: ", ex);
+		}
+		return null;		
 	}
 
 	@Bean
@@ -73,14 +74,4 @@ private final Logger logger = LoggerFactory.getLogger(this.getClass());
 		
 		return mailSender;
 	}
-	
-//	private String toVideoMessage(VideoDto video){
-//        Map message = new HashMap<String, String>();
-//        message.put("id",video.getId());
-//        message.put("nomeVideo",video.getNome());
-//        message.put("codigoEdicao",video.getCodigoEdicao().toString());
-//        message.put("statusEdicao",StatusEdicao.COM_ERRO);
-//        return gson.toJson(message);
-//    }
-	
 }

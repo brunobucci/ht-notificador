@@ -46,6 +46,7 @@ public class NotificacaoQueueAdapterIN implements INotificacaoQueueAdapterIN{
 				mensagem.get("id"),
 				mensagem.get("codigoEdicao"),
 				mensagem.get("nomeVideo"), 
+				mensagem.get("tentativasDeEdicao"), 
 				StatusEdicao.valueOf(mensagem.get("statusEdicao")));
 	}
 }
